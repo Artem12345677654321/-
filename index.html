@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLATO RUG | Ателье Текстильной Архитектуры</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- GSAP for Award-Winning Animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    
+    <!-- NOTE: Virtual Scroll Engine v11.0 Active -->
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        /* --- CORE VARIABLES --- */
+        :root {
+            --bg-body: #050505; 
+            --bg-card: #0F0F0F;
+            --accent-gold: #D4AF37;
+            --text-main: #EAEAEA;
+            --text-muted: #888888;
+            --ease-cinema: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* --- RESET & BASE --- */
+        html, body {
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            font-family: 'Manrope', sans-serif;
+            line-height: 1.6;
+            
+            /* Native scroll enabled by default (for mobile/fallback) */
+            /* JS will manage height for Virtual Scroll on desktop */
+            overflow-x: hidden;
+            overflow-y: auto; 
+            
+            /* Custom Cursor */
+            cursor: none !important;
+        }
+
+        /* --- FILM GRAIN OVERLAY (TOP 2025 AESTHETIC) --- */
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9000;
+            opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* --- ARCHITECTURE: STRICT AUDIT COMPLIANCE --- */
+        #app-container {
+            position: fixed;
+            top: 0; 
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: 1;
+            /* CRITICAL: Allow events to pass through wrapper to the body/scroll-bar */
+            pointer-events: none; 
+        }
+
+        #scroll-content {
+            width: 100%;
+            /* PERFORMANCE AUDIT: Hint browser for GPU composition */
+            will-change: transform;
+            z-index: 2;
+            /* CRITICAL: Capture events on actual content elements */
+            pointer-events: auto; 
+        }
+
+        /* --- UI ELEMENTS --- */
+        *, *::before, *::after, a, button, [role="button"], input, select, textarea {
+            cursor: none !important;
+        }
+        
+        /* --- CUSTOM CURSOR --- */
+        .cursor-dot, .cursor-outline {
+            position: fixed; top: 0; left: 0;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            z-index: 9999;
+            /* CRITICAL: Prevent cursor from intercepting clicks/scroll */
+            pointer-events: none !important; 
+        }
+        .cursor-dot { width: 6px; height: 6px; background-color: var(--accent-gold); }
+        .cursor-outline {
+            width: 40px; height: 40px;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            transition: width 0.3s var(--ease-cinema), height 0.3s var(--ease-cinema), background-color 0.3s;
+        }
+        body.hovering .cursor-outline {
+            width: 80px; height: 80px;
+            background-color: rgba(212, 175, 55, 0.05);
+            border-color: var(--accent-gold);
+            mix-blend-mode: difference;
+        }
+
+        /* --- HEADER STATES --- */
+        header.scrolled {
+            background-color: rgba(5, 5, 5, 0.8) !important;
+            backdrop-filter: blur(10px);
+            border-bottom-color: rgba(255, 255, 255, 0.05) !important;
+        }
+        header:not(.scrolled) {
+            background-color: transparent !important;
+            border-bottom-color: transparent !important;
+        }
+
+        /* --- UTILITY --- */
+        .container { width: 92%; max-width: 1800px; margin: 0 auto; }
+        .clip-text { clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%); }
+        .char { display: inline-block; }
+
+        /* --- SHUTTER CURTAINS --- */
+        .shutter {
+            position: fixed; left: 0; width: 100%; height: 50%;
+            background: #050505; 
+            will-change: transform;
+            pointer-events: none; 
+            z-index: 99998;
+        }
+        .shutter.top { top: 0; transform-origin: top; }
+        .shutter.bottom { bottom: 0; top: auto; transform-origin: bottom; }
+
+        /* --- HOVER REVEAL EFFECT --- */
+        .hover-reveal-img {
+            position: fixed; pointer-events: none;
+            width: 300px; height: 400px;
+            object-fit: cover;
+            z-index: 50;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: opacity 0.3s, transform 0.5s var(--ease-cinema);
+            border-radius: 4px;
+        }
+        .hover-reveal-img.active { opacity: 0.8; transform: scale(1); }
+
+    </style>
+    <script type="importmap">
+{
+  "imports": {
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
+    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+    "react-dom": "https://esm.sh/react-dom@18.2.0",
+    "react/jsx-runtime": "https://esm.sh/react@18.2.0/jsx-runtime",
+    "react": "https://esm.sh/react@18.2.0",
+    "lucide-react": "https://esm.sh/lucide-react@0.330.0",
+    "recharts": "https://esm.sh/recharts@2.12.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
+    "react/": "https://aistudiocdn.com/react@^19.2.1/"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body style="background-color: #050505;">
+    <div class="noise-overlay"></div>
+    <div id="root"></div>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>

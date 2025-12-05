@@ -1,0 +1,7 @@
+{
+  "name": "PLATO RUG | Haute Couture",
+  "description": "PLATO RUG: Создание ковров Haute Couture. Ручной тафтинг, 3D-скульптурирование, премиальные материалы.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
